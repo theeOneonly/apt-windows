@@ -1,0 +1,44 @@
+#!/usr/bin/python3
+import argparse, sys, os
+import apt
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--update', help='update cache use "now"')
+parser.add_argument('--install', type=str, help='install linux package')
+try:
+    args = parser.parse_args()
+    if args.update == "now":
+        args = parser.parse_args()
+        print("Caching data")
+        cache = apt.cache.Cache()
+        print("Updating Cache")
+        cache.update()
+        print("Installing Updates")
+        print("Update Cache... Done")
+        cache.open()
+        print("Caching data... Done\n\n")
+    else:
+        try:
+            cache = apt.cache.Cache()
+            args = parser.parse_args()
+            print("installing... [" + args.install + "]")
+            pkg_name = args.install
+            pkg = cache[pkg_name]
+            print("Understanding " + args.install +" status [Installed]/[Uninstalled]...")
+            parser = argparse.ArgumentParser()
+            if pkg.is_installed:
+                print("error: AppFound...\n      {pkg_name} already installed".format(pkg_name=pkg_name))
+            else:
+                try:
+                    print("Installing " + args.install + " NOW...")
+                    pkg.mark_install()
+                except KeyError:
+                    print("Error: AppAlien\n    App [" + args.install + "] is not real...")
+                try:
+                    cache.commit()
+                except Exception as arg:
+                    print("Installation status ... \n['Alien'] [{err}]".format(err=str(arg)), file=sys.stderr)
+        except KeyError:
+            print("helo")
+except TypeError:
+    print('usage: apt [-h] [--install INSTALL]\n\noptional arguments:\n  -h, --help         show this help message and exit\n  --update UPDATE    update cache use "now"\n  --install INSTALL  install linux package')
